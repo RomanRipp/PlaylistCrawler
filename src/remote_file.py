@@ -8,11 +8,15 @@ import httplib2
 import os
 import io
 import oauth2client
+import urlparse
 
 from apiclient import discovery
 from oauth2client import client
 from oauth2client import tools
 from apiclient.http import MediaIoBaseDownload
+
+def is_url(url):
+    return urlparse.urlparse(url).scheme != ""
 
 class RemoteFile(object):
     '''
@@ -22,7 +26,6 @@ class RemoteFile(object):
     SCOPES = 'https://www.googleapis.com/auth/drive'
     CLIENT_SECRET_FILE = '../client_secret.json'
     APPLICATION_NAME = 'Drive API Python Quickstart'
-    
     LOCAL_NAME = 'temp.xml'    
 
     def get_credentials(self):
@@ -44,10 +47,9 @@ class RemoteFile(object):
                 credentials = tools.run(flow, store)
             print('Storing credentials to ' + credential_path)
         return credentials
-
-
-    def open(self):
-        
+    
+    
+    def download(self):
         credentials = self.get_credentials()
         http = credentials.authorize(httplib2.Http())
         service = discovery.build('drive', 'v3', http=http)
@@ -61,8 +63,20 @@ class RemoteFile(object):
         while done is False:
             status, done = downloader.next_chunk()
             print('Download %d%%.' % int(status.progress() * 100))
+
+    
+    def exists(self):
+        raise NotImplementedError()
+                    
+
+    def open(self):
+        self.download()
         self._fh = open(self.LOCAL_NAME, 'r');
+ 
         
+    def get_file(self):
+        self.download()
+        return self.LOCAL_NAME
         
 #         results = service.files().list(
 #         pageSize=10,fields="nextPageToken, files(id, name)").execute()
@@ -79,8 +93,10 @@ class RemoteFile(object):
         self._fh.close()
         os.remove(self.LOCAL_NAME);
 
+
     def read(self):
         return self._fh.read()
+
 
     def __init__(self, fileURL, flags):
         self._URL = fileURL
