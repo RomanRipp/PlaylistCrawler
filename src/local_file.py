@@ -17,6 +17,20 @@ def get_files_in_dir(path):
             localFiles.append(LocalFile(fileName))
     return localFiles
 
+
+def get_files_in_dir_recursive(path):
+    localFiles = []
+    print('Playlists found: ')
+    for root, dir, files in os.walk(path):
+        for fileName in files:
+            lowerCase = fileName.lower()
+            if lowerCase.endswith('.xml') and 'delta' not in lowerCase:
+                print (fileName)
+                fileName = os.path.join(root, fileName)
+                localFiles.append(LocalFile(fileName))
+    return localFiles
+
+
 class LocalFile(object):
     '''
     classdocs
