@@ -4,11 +4,11 @@ Created on Feb 5, 2016
 @author: Roman
 '''
 from oauth2client import tools
-import remote_file as rf
+#import remote_file as rf
 import local_file as lf
 import os
 import shutil
-from lxml import etree
+import xml.etree.ElementTree as ET
 from progressbar import ProgressBar, Percentage, Bar
 import decimal
 
@@ -25,7 +25,7 @@ class PlaylistParser(object):
             print('Reference file does not exist, creating one: ' + referenceFile.get_name())
             shutil.copy(self._inputFiles[0].get_name(), referenceFile.get_name())
         
-        return etree.parse(referenceFile.get_name())
+        return ET.parse(referenceFile.get_name())
         
 
     def find_node(self, root, triggerName, caseName):
@@ -40,7 +40,7 @@ class PlaylistParser(object):
     def add_node(self, refCase, nodeName):
         node = refCase.find(nodeName)
         if node is None:
-            node = etree.SubElement(refCase, nodeName)
+            node = ET.SubElement(refCase, nodeName)
             node.text = '0'
         return node
     
@@ -90,14 +90,15 @@ class PlaylistParser(object):
         count = 0
         for inputFile in self._inputFiles:
             print('Processing: ' + inputFile.get_name())
-            playlistTree = etree.parse(inputFile.get_name())
+            playlistTree = ET.parse(inputFile.get_name())
             self.update_reference(referenceTree, playlistTree)
             #Save from time to time
+            count += 1
             if count > 10:
-                referenceTree.write(self._outputFile.get_name(), pretty_print=False)
+                referenceTree.write(self._outputFile.get_name())
                 count = 0
 
-        referenceTree.write(self._outputFile.get_name(), pretty_print=False)
+        referenceTree.write(self._outputFile.get_name())
         print('\n All reports processed, report file: ' + self._outputFile.get_name())
 
     def __init__(self):
@@ -121,12 +122,12 @@ class PlaylistParser(object):
             self._inputFiles = lf.get_files_in_dir_recursive(flags.input_url)
         elif os.path.isfile(flags.input_url):
             self._inputFiles.append(lf.LocalFile(flags.input_url))
-        elif rf.is_url(flags.input_url):
-            self._inputFiles.append(rf.RemoteFile(flags.input_url, flags))
+        #elif rf.is_url(flags.input_url):
+            #self._inputFiles.append(rf.RemoteFile(flags.input_url, flags))
         else:
             raise ValueError('input file type is not supported')
 
-        if rf.is_url(flags.output_url):
-            self._outputFile = rf.RemoteFile(flags.output_url, flags)
-        else:
-            self._outputFile = lf.LocalFile(flags.output_url)
+        #if rf.is_url(flags.output_url):
+            #self._outputFile = rf.RemoteFile(flags.output_url, flags)
+        #else:
+        self._outputFile = lf.LocalFile(flags.output_url)
