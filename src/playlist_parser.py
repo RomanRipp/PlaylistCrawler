@@ -8,7 +8,8 @@ from oauth2client import tools
 import local_file as lf
 import os
 import shutil
-import xml.etree.ElementTree as ET
+#import xml.etree.ElementTree as ET
+import lxml.etree as ET
 from progressbar import ProgressBar, Percentage, Bar
 import decimal
 
