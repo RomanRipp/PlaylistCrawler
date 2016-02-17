@@ -6,6 +6,7 @@ Created on Feb 5, 2016
 from oauth2client import tools
 from progressbar import ProgressBar, Percentage, Bar
 import os
+import re
 import uuid
 import shutil
 import decimal
@@ -79,7 +80,9 @@ class PlaylistParser(object):
             
             self.increment_node(refCase, 'runs')
             
-            testResult = newCase.find('playoutcome').text.lower().replace(" ", "")
+            testResult = newCase.find('playoutcome').text.lower()
+            testResult = re.sub(r"[^\w\s]", "", testResult)
+            testResult = re.sub(r"\s+", "", testResult)
             self.increment_node(refCase, testResult)
                             
     
